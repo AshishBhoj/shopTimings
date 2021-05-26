@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+    <style>
+      .col-12 input,
+      .col-12 select,
+      #horizontal__line {
+        width: 50%;
+      }
+    </style>
+    <title>Check Status</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Check Status</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+          </ul>
+          <form class="d-flex">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit">
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+    <section class="col-lg-8 p-3 py-md-5" style="margin-left: auto !important">
+      <div class="row g-5">
+        <div class="col-md-12">
+          <h2>Check Status</h2>
+          <form
+            name="statusForm"
+            autocomplete="off"
+            onsubmit="event.preventDefault(); return validateForm()"
+          >
+            <div class="col-12 mb-3">
+              <label for="startingTime">Start Time</label><br />
+              <input
+                class="startingTime"
+                type="time"
+                id="startingTime"
+                name="startingTime"
+              />
+            </div>
+            <div class="col-12 mb-3">
+              <label for="endingTime">End Time</label><br />
+              <input
+                class="endingTime"
+                type="time"
+                id="endingTime"
+                name="endingTime"
+              />
+            </div>
+            <div class="col-12 mb-3 mt-3">
+              <label for="weekdays">Day</label><br />
+              <select
+                class="form-select"
+                class="weekdays"
+                name="weekdays"
+                id="weekdays"
+              >
+                <option value="0">Sunday</option>
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+              </select>
+            </div>
+            <div>
+              <input
+                id="checkStatus"
+                type="submit"
+                value="Check Status"
+                class="btn btn-outline-secondary mt-3"
+              />
+            </div>
+          </form>
+          <hr id="horizontal__line" />
+          <p id="updatedStatus"></p>
+          <p id="countDownTime" class="text-muted"></p>
+        </div>
+      </div>
+    </section>
+    <script>
+      let shopStartTime = 10;
+      let shopStartMinute = 0;
+      let shopEndTime = 19;
+      let shopEndMinute = 0;
+
+      function validateForm() {
+        inputStartTime = document.getElementById("startingTime").value;
+        inputEndTime = document.getElementById("endingTime").value;
+        if (inputStartTime == null || inputStartTime == "") {
+          window.alert("Please enter correct time");
+          inputStartTime.focus();
+          return false;
+        }
+        if (inputEndTime == null || inputEndTime == "") {
+          window.alert("Please enter correct time");
+          inputEndTime.focus();
+          return false;
+        }
+      }
+
+      function getUserTimings() {
+        startHour = document.getElementById("startingTime").value.split(":")[0];
+        startMinute = document
+          .getElementById("startingTime")
+          .value.split(":")[1];
+        endHour = document.getElementById("endingTime").value.split(":")[0];
+        endMinute = document.getElementById("endingTime").value.split(":")[1];
+        weekdays = document.getElementById("weekdays").value;
+      }
+
+      function isOpen() {
+        getUserTimings();
+        if (weekdays == 0 || weekdays == 6) {
+          document.getElementById("updatedStatus").textContent = "Closed Today";
+        } else {
+          morningShift();
+        }
+      }
+
+      function morningShift() {
+        if (startHour >= shopStartTime && startHour < shopEndTime) {
+          document.getElementById("updatedStatus").textContent = "We're open";
+          let countdownTimer = setInterval(timer);
+        } else {
+          if (endHour >= shopStartTime && endHour < shopEndTime) {
+            document.getElementById("updatedStatus").textContent = "Closed Now";
+            let countdownTimer_2 = setInterval(timer_2);
+          } else {
+            document.getElementById("updatedStatus").textContent =
+              "We're closed";
+          }
+        }
+      }
+      function timer() {
+        getUserTimings();
+        if (startMinute == 0) {
+          if (shopEndTime > startHour) {
+            hourDifference = shopEndTime - startHour;
+            minuteDifference = shopEndMinute - startMinute;
+            document.getElementById("countDownTime").textContent =
+              "Closing in : " + hourDifference + "h " + minuteDifference + "m ";
+          } else {
+            clearInterval(countdownTimer);
+            document.getElementById("countDownTime").textContent = "Closed Now";
+          }
+        } else {
+          if (shopEndTime > startHour) {
+            hourDifference = shopEndTime - 1 - startHour;
+            minuteDifference = shopEndMinute + 60 - startMinute;
+            document.getElementById("countDownTime").textContent =
+              "Closing in : " + hourDifference + "h " + minuteDifference + "m ";
+          } else {
+            clearInterval(countdownTimer);
+            document.getElementById("countDownTime").textContent = "Closed Now";
+          }
+        }
+      }
+
+      function timer_2() {
+        getUserTimings();
+        if (startMinute == 0) {
+          if (endHour > shopStartTime) {
+            if (startHour >= shopEndTime && startHour <= 23) {
+              hourDifference = 24 - startHour + shopStartTime;
+              minuteDifference = shopStartMinute - startMinute;
+            } else {
+              hourDifference = shopStartTime - startHour;
+              minuteDifference = shopStartMinute - startMinute;
+            }
+            document.getElementById("countDownTime").textContent =
+              "Opening in : " + hourDifference + "h " + minuteDifference + "m ";
+          } else {
+            clearInterval(countdownTimer_2);
+            document.getElementById("countDownTime").textContent = "Closed Now";
+          }
+        } else {
+          if (endHour > shopStartTime) {
+            if (startHour >= shopEndTime && startHour <= 23) {
+              hourDifference = 24 - startHour + shopStartTime - 1;
+              minuteDifference = shopStartMinute + 60 - startMinute;
+            } else {
+              hourDifference = shopStartTime - 1 - startHour;
+              minuteDifference = shopStartMinute + 60 - startMinute;
+            }
+            document.getElementById("countDownTime").textContent =
+              "Opening in : " + hourDifference + "h " + minuteDifference + "m ";
+          } else {
+            clearInterval(countdownTimer_2);
+            document.getElementById("countDownTime").textContent = "Closed Now";
+          }
+        }
+      }
+
+      checkStatus = document.getElementById("checkStatus");
+      checkStatus.addEventListener("click", () => {
+        validateForm();
+        isOpen();
+      });
+    </script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
